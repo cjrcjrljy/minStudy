@@ -71,8 +71,8 @@ class FilePickerWindow(QWidget):
         # 时间显示区域
         self.time_label = QLabel(self)
         self.time_label.setAlignment(Qt.AlignRight | Qt.AlignTop)
-        self.time_label.setFont(QFont("Arial", 20, QFont.Bold))  # 字体大小改为20
-        self.time_label.setFixedHeight(50)                       # 高度也调小
+        self.time_label.setFont(QFont("Arial", 20, QFont.Bold))
+        self.time_label.setFixedHeight(50)
         right_layout.addWidget(self.time_label)
         right_frame.setLayout(right_layout)
 
@@ -112,9 +112,7 @@ class FilePickerWindow(QWidget):
             self.enter_btn.hide()
         # 隐藏 loading 动画
         self.hideLoading()
-        # 重置右上角时间
-        self.setStartTime(self.start_time)  # 重新初始化时间
-        self.virtual_seconds = 0
+        # 时间相关的代码已去除，不再清零
 
     def displayImage(self, file_path):
         pixmap = QPixmap(file_path)
@@ -221,15 +219,23 @@ class FilePickerWindow(QWidget):
                 self.start_time = QTime(8, 0, 0)
         else:
             self.start_time = QTime(8, 0, 0)
-        self.virtual_seconds = 0
+        # 不再清零virtual_seconds
         self.updateTimeDisplay()  # 刷新显示
 
     def updateTimeDisplay(self):
         # 1秒对应虚拟1分钟
         current_minute = self.virtual_seconds
         current_time = self.start_time.addSecs(current_minute * 60)
-        self.time_label.setText(current_time.toString('HH:mm'))  # 只显示时间，不加前缀
+        self.time_label.setText(current_time.toString('HH:mm'))
         self.virtual_seconds += 1
+
+    def getCurrentVirtualTime(self):
+        """
+        返回当前显示的虚拟时间字符串，格式 'HH:mm'
+        """
+        current_minute = self.virtual_seconds
+        current_time = self.start_time.addSecs(current_minute * 60)
+        return current_time.toString('HH:mm')
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
