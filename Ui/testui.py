@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (
     QApplication, QWidget, QPushButton, QFileDialog,
     QVBoxLayout, QLabel, QHBoxLayout, QFrame
 )
-from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtGui import QPixmap, QImage, QMovie
 from PyQt5.QtCore import Qt
 import cv2
 from ultralytics import YOLO
@@ -15,6 +15,8 @@ class FilePickerWindow(QWidget):
         self.selected_file = None
         self.enter_btn = None
         self.crop_img_labels = []
+        self.loading_label = None
+        self.loading_movie = None
         self.initUI()
 
     def initUI(self):
@@ -42,6 +44,13 @@ class FilePickerWindow(QWidget):
         self.image_label.setAlignment(Qt.AlignCenter)
         self.image_label.setFixedSize(350, 350)
         self.left_layout.addWidget(self.image_label)
+
+        # 加载动画label
+        self.loading_label = QLabel(self)
+        self.loading_label.setAlignment(Qt.AlignCenter)
+        self.loading_label.setFixedSize(50, 50)
+        self.loading_label.setVisible(False)
+        self.left_layout.addWidget(self.loading_label)
 
         # 车牌裁剪结果区域
         self.crop_area = QHBoxLayout()
@@ -86,6 +95,8 @@ class FilePickerWindow(QWidget):
         # 隐藏“进入停车场”按钮
         if self.enter_btn is not None:
             self.enter_btn.hide()
+        # 隐藏 loading 动画
+        self.hideLoading()
 
     def displayImage(self, file_path):
         pixmap = QPixmap(file_path)
@@ -106,11 +117,26 @@ class FilePickerWindow(QWidget):
         else:
             self.enter_btn.show()
 
+    def showLoading(self):
+        # 加载动画GIF，路径可以改成你的实际路径
+        self.loading_movie = QMovie("loading.gif")
+        self.loading_label.setMovie(self.loading_movie)
+        self.loading_label.setVisible(True)
+        self.loading_movie.start()
+        QApplication.processEvents()  # 确保动画显示
+
+    def hideLoading(self):
+        if self.loading_movie:
+            self.loading_movie.stop()
+        self.loading_label.setVisible(False)
+
     def enterParking(self):
         """
         进入停车场按钮槽函数。
         显示标注后的图片和裁剪放大的车牌图片
         """
+        self.showLoading()  # 开始动画
+
         now_img = tools.img_cvread(self.selected_file)  # BGR格式
 
         # YOLO检测
@@ -132,6 +158,8 @@ class FilePickerWindow(QWidget):
         self.displayLabeledImage(now_img)
         # 显示所有车牌大图
         self.displayCropImgs(crop_imgs)
+
+        self.hideLoading()  # 停止动画
 
     def displayLabeledImage(self, img):
         """
