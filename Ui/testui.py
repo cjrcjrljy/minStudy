@@ -1,10 +1,10 @@
 import sys
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QPushButton, QFileDialog,
-    QVBoxLayout, QLabel, QHBoxLayout, QFrame
+    QVBoxLayout, QLabel, QHBoxLayout, QFrame, QGridLayout
 )
-from PyQt5.QtGui import QPixmap, QImage, QMovie
-from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap, QImage, QMovie, QFont
+from PyQt5.QtCore import Qt, QTimer, QTime
 import cv2
 from ultralytics import YOLO
 import detect_tools as tools
@@ -17,6 +17,10 @@ class FilePickerWindow(QWidget):
         self.crop_img_labels = []
         self.loading_label = None
         self.loading_movie = None
+        self.start_time = QTime(8, 0, 0)  # 默认08:00
+        self.timer = None
+        self.time_label = None
+        self.virtual_seconds = 0  # 虚拟已过秒数
         self.initUI()
 
     def initUI(self):
@@ -58,14 +62,25 @@ class FilePickerWindow(QWidget):
 
         left_frame.setLayout(self.left_layout)
 
-        # 右侧区域暂为空
+        # 右侧区域
         right_frame = QFrame(self)
         right_frame.setFrameShape(QFrame.StyledPanel)
+        right_layout = QVBoxLayout(right_frame)
+        right_layout.setAlignment(Qt.AlignTop)
+
+        # 时间显示区域
+        self.time_label = QLabel(self)
+        self.time_label.setAlignment(Qt.AlignRight | Qt.AlignTop)
+        self.time_label.setFont(QFont("Arial", 36, QFont.Bold))
+        self.time_label.setFixedHeight(80)
+        right_layout.addWidget(self.time_label)
+        right_frame.setLayout(right_layout)
 
         main_layout.addWidget(left_frame)
         main_layout.addWidget(right_frame)
 
         self.setLayout(main_layout)
+        self.initTimerDisplay()
 
     def showFileDialog(self):
         # 重置所有显示区域
@@ -97,6 +112,9 @@ class FilePickerWindow(QWidget):
             self.enter_btn.hide()
         # 隐藏 loading 动画
         self.hideLoading()
+        # 重置右上角时间
+        self.setStartTime(self.start_time)  # 重新初始化时间
+        self.virtual_seconds = 0
 
     def displayImage(self, file_path):
         pixmap = QPixmap(file_path)
@@ -118,12 +136,11 @@ class FilePickerWindow(QWidget):
             self.enter_btn.show()
 
     def showLoading(self):
-        # 加载动画GIF，路径可以改成你的实际路径
         self.loading_movie = QMovie("loading.gif")
         self.loading_label.setMovie(self.loading_movie)
         self.loading_label.setVisible(True)
         self.loading_movie.start()
-        QApplication.processEvents()  # 确保动画显示
+        QApplication.processEvents()
 
     def hideLoading(self):
         if self.loading_movie:
@@ -131,12 +148,7 @@ class FilePickerWindow(QWidget):
         self.loading_label.setVisible(False)
 
     def enterParking(self):
-        """
-        进入停车场按钮槽函数。
-        显示标注后的图片和裁剪放大的车牌图片
-        """
-        self.showLoading()  # 开始动画
-
+        self.showLoading()
         now_img = tools.img_cvread(self.selected_file)  # BGR格式
 
         # YOLO检测
@@ -147,25 +159,17 @@ class FilePickerWindow(QWidget):
         crop_imgs = []
         if len(location_list) >= 1:
             location_list = [list(map(int, e)) for e in location_list]
-            # 在原图上画框
             for each in location_list:
                 x1, y1, x2, y2 = each
-                cv2.rectangle(now_img, (x1, y1), (x2, y2), (0, 255, 0), 2)  # 标注主图
+                cv2.rectangle(now_img, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 cropImg = now_img[y1:y2, x1:x2]
                 cropImg = cv2.resize(cropImg, (240, 80), interpolation=cv2.INTER_LINEAR)
                 crop_imgs.append(cropImg)
-        # 显示标注主图
         self.displayLabeledImage(now_img)
-        # 显示所有车牌大图
         self.displayCropImgs(crop_imgs)
-
-        self.hideLoading()  # 停止动画
+        self.hideLoading()
 
     def displayLabeledImage(self, img):
-        """
-        显示标注（画框）后的图片到主界面
-        img: OpenCV格式（BGR）
-        """
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         height, width, channel = img_rgb.shape
         bytesPerLine = 3 * width
@@ -175,7 +179,6 @@ class FilePickerWindow(QWidget):
         self.image_label.setPixmap(pixmap)
 
     def displayCropImgs(self, cropImgList):
-        # 清理之前的车牌图片标签
         for label in self.crop_img_labels:
             self.crop_area.removeWidget(label)
             label.deleteLater()
@@ -192,11 +195,41 @@ class FilePickerWindow(QWidget):
             self.crop_img_labels.append(crop_label)
 
     def cvMatToQImage(self, cvImg):
-        """OpenCV图片转QImage"""
         height, width, channel = cvImg.shape
         bytesPerLine = 3 * width
         qImg = QImage(cvImg.data, width, height, bytesPerLine, QImage.Format_RGB888).rgbSwapped()
         return qImg
+
+    # --------- 时间显示相关 ----------
+    def initTimerDisplay(self):
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.updateTimeDisplay)
+        self.setStartTime(self.start_time)
+        self.timer.start(1000)  # 1s更新一次
+
+    def setStartTime(self, qtime_or_str=None):
+        """
+        外部可调用，传入QTime或'HH:MM'字符串
+        """
+        if isinstance(qtime_or_str, QTime):
+            self.start_time = qtime_or_str
+        elif isinstance(qtime_or_str, str):
+            try:
+                h, m = map(int, qtime_or_str.split(":"))
+                self.start_time = QTime(h, m, 0)
+            except:
+                self.start_time = QTime(8, 0, 0)
+        else:
+            self.start_time = QTime(8, 0, 0)
+        self.virtual_seconds = 0
+        self.updateTimeDisplay()  # 刷新显示
+
+    def updateTimeDisplay(self):
+        # 1秒对应虚拟1分钟
+        current_minute = self.virtual_seconds
+        current_time = self.start_time.addSecs(current_minute * 60)
+        self.time_label.setText(current_time.toString("HH:mm"))
+        self.virtual_seconds += 1
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
