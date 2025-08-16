@@ -71,8 +71,8 @@ class FilePickerWindow(QWidget):
         # 时间显示区域
         self.time_label = QLabel(self)
         self.time_label.setAlignment(Qt.AlignRight | Qt.AlignTop)
-        self.time_label.setFont(QFont("Arial", 36, QFont.Bold))
-        self.time_label.setFixedHeight(80)
+        self.time_label.setFont(QFont("Arial", 20, QFont.Bold))  # 字体大小改为20
+        self.time_label.setFixedHeight(50)                       # 高度也调小
         right_layout.addWidget(self.time_label)
         right_frame.setLayout(right_layout)
 
@@ -228,7 +228,7 @@ class FilePickerWindow(QWidget):
         # 1秒对应虚拟1分钟
         current_minute = self.virtual_seconds
         current_time = self.start_time.addSecs(current_minute * 60)
-        self.time_label.setText(current_time.toString("HH:mm"))
+        self.time_label.setText(current_time.toString('HH:mm'))  # 只显示时间，不加前缀
         self.virtual_seconds += 1
 
 if __name__ == '__main__':
