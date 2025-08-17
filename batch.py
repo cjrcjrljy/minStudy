@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     # 加载模型
     fontC = ImageFont.truetype("Font/platech.ttf", 50, 0)
-    yolo_model_path = r'D:\Study\college_course\da_2_xia\xiaoxueqi\firstWeek\FirstWeek\runs\detect\train5\weights\best.pt'
+    yolo_model_path = r'models/best.pt'
     model = YOLO(yolo_model_path, task='detect')
     ocr = hub.Module(name="ch_pp-ocrv3")
 

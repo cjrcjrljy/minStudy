@@ -5,7 +5,7 @@ import paddlehub as hub
 from PIL import ImageFont, Image
 from paddleocr import PaddleOCR
 
-yolo_model_path = r'D:\Study\college_course\da_2_xia\xiaoxueqi\firstWeek\FirstWeek\runs\detect\train5\weights\best.pt'
+yolo_model_path = r'models\best.pt'
 model = YOLO(yolo_model_path, task='detect')
 
 

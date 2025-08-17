@@ -11,14 +11,14 @@ import re
 
 if __name__ == "__main__":
     # 需要检测的图片地址
-    img_path = "TestFiles/016015625-88_90-298&486_503&565-499&550_298&565_298&495_503&486-0_0_3_27_27_24_30_24-108-194.jpg"
+    img_path = "D:/Code/py/yolo/datasets/PlateData/images/test/01-90_265-231&522_405&574-405&571_235&574_231&523_403&522-0_0_3_1_28_29_30_30-134-56.jpg"
     now_img = tools.img_cvread(img_path)
 
     fontC = ImageFont.truetype("Font/platech.ttf", 50, 0)
     # 加载ocr模型
     ocr = PaddleOCR(lang="ch")
     # YOLO模型路径
-    yolo_model_path = r'D:\Study\college_course\da_2_xia\xiaoxueqi\firstWeek\FirstWeek\runs\detect\train5\weights\best.pt'
+    yolo_model_path = r'models/best.pt'
     model = YOLO(yolo_model_path, task='detect')
 
     # 检测
