@@ -198,6 +198,8 @@ class FilePickerWindow(QWidget):
 
         # YOLO检测
         yolo_model_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'models', 'best.pt')
+        #D:\Study\college_course\da_2_xia\xiaoxueqi\firstWeek\FirstWeek\runs\detect\train5\weights\best.pt
+        yolo_model_path=r'D:\Study\college_course\da_2_xia\xiaoxueqi\firstWeek\FirstWeek\runs\detect\train5\weights\best.pt'
         model = YOLO(yolo_model_path, task='detect')
         results = model(self.selected_file)[0]
         location_list = results.boxes.xyxy.tolist()
