@@ -1,27 +1,27 @@
 {
   "current_vehicles": {
-    "沪A·F58686": "2025-08-18T08:28:00",
-    "皖A·D33060": "2025-08-18T08:35:00"
+    "沪A·F58686": "2025-08-18T08:45:00",
+    "皖A·D33060": "2025-08-18T09:00:00"
   },
   "recognition_count": {
-    "皖A·D01846": 4,
+    "皖A·F19009": 4,
     "沪A·F58686": 1,
     "皖A·D33060": 1
   },
   "parking_history": [
     {
-      "plate_number": "皖A·D01846",
-      "entry_time": "2025-08-18T08:10:00",
-      "exit_time": "2025-08-18T08:17:00",
-      "duration_seconds": 420.0,
-      "duration_formatted": "0小时7分钟0秒"
+      "plate_number": "皖A·F19009",
+      "entry_time": "2025-08-18T08:19:00",
+      "exit_time": "2025-08-18T08:36:00",
+      "duration_seconds": 1020.0,
+      "duration_formatted": "0小时17分钟0秒"
     },
     {
-      "plate_number": "皖A·D01846",
-      "entry_time": "2025-08-18T08:20:00",
-      "exit_time": "2025-08-18T08:22:00",
-      "duration_seconds": 120.0,
-      "duration_formatted": "0小时2分钟0秒"
+      "plate_number": "皖A·F19009",
+      "entry_time": "2025-08-18T08:37:00",
+      "exit_time": "2025-08-18T09:09:00",
+      "duration_seconds": 1920.0,
+      "duration_formatted": "0小时32分钟0秒"
     }
   ]
 }
